@@ -27,7 +27,7 @@ server.get("/index", function(req, res) {
 });
 
 // Display tables and wait list
-server.get("./frontend/tables.html", function(req, res) {
+server.get("/api/tables", function(req, res) {
   let tables = getTables(reservations);
   let waitList = getWaitList(reservations);
   return res.json({tables, waitList});
