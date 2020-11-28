@@ -2,6 +2,11 @@ const express = require("express")
 let server = express()
 let port = 3000
 
+// Hanle URL
+server.use(express.urlencoded({ extended: true }));
+// JSON read/write ability
+server.use(express.json());
+
 let reservations = [];
 
 // Get objects for tables
@@ -19,16 +24,18 @@ server.get("/index", function(req, res) {
   res.send("Welcome to the Star Wars Page!");
 });
 
-// Get reservation data
-server.get("/reserve", function(req, res) {
-  res.send("data collect")
-});
-
 // Display tables and wait list
 server.get("/tables", function(req, res) {
   let tables = getTables(reservations);
   let waitList = getWaitList(reservations);
   return res.json({tables, waitList});
+});
+
+// Get reservation data
+server.post("/reserve", function(req, res) {
+  let newReservation = req.body;
+  reservations.push(newReservation);
+  res.json(newReservation);
 });
 
 // Server listener
