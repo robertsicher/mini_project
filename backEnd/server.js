@@ -1,6 +1,8 @@
 const express = require("express")
+const cors = require("cors")
 let server = express()
 let port = 3000
+server.use(cors())
 
 // Hanle URL
 server.use(express.urlencoded({ extended: true }));
@@ -25,7 +27,7 @@ server.get("/index", function(req, res) {
 });
 
 // Display tables and wait list
-server.get("/tables", function(req, res) {
+server.get("./frontend/tables.html", function(req, res) {
   let tables = getTables(reservations);
   let waitList = getWaitList(reservations);
   return res.json({tables, waitList});
