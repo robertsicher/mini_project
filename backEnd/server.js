@@ -1,9 +1,9 @@
-const express = require("express")
-const cors = require("cors")
-let server = express()
-let port = 3000
-server.use(cors())
-
+const express = require("express");
+const cors = require("cors");
+let server = express();
+let port = 3000;
+server.use(cors());
+server.use(express.static('../front end'));
 // Hanle URL
 server.use(express.urlencoded({ extended: true }));
 // JSON read/write ability
@@ -13,7 +13,7 @@ let reservations = [];
 
 // Get objects for tables
 const getTables = (reservations) => {
-  return reservations.slice(0, 5)
+  return reservations.slice(0, 5);
 };
 
 // Get objects for wait list
@@ -22,8 +22,8 @@ const getWaitList = (reservations) => {
 };
 
 // Display homepage
-server.get("/index", function(req, res) {
-  res.send("Welcome to the Star Wars Page!");
+server.get("/", function(req, res) {
+  res.sendFile("../front end/index.html", {root: __dirname});
 });
 
 // Display tables and wait list
@@ -43,4 +43,4 @@ server.post("/reserve", function(req, res) {
 // Server listener
 server.listen(port, () => {
     console.log("Server is listening in port ", port)
-})
+});
