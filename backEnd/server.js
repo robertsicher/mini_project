@@ -1,10 +1,11 @@
 const express = require("express")
 let server = express()
 let port = 3000
-
  
-
-server.get("/",(req,res) => {
+//server.get("/",(req,res) => {
+    //res.send("<h1>Hello</h1>")
+//})
+server.post("/",(req,res) => {
     res.send("<h1>Welcome</h1>")
 })
  
