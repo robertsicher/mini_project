@@ -1,8 +1,9 @@
 const express = require("express");
 const cors = require("cors");
-let server = express();
-let port = 3000;
+const server = express();
+const port = 3000;
 const mysql = require("mysql");
+const util = require("util");
 server.use(cors());
 server.use(express.static('../front end'));
 // Hanle URL
@@ -17,18 +18,22 @@ const connection = mysql.createConnection({
   port: 3306,
   user: "root",
   password,
-  database: "reservations",
+  database: "restaurant",
 });
+
+//let promisifiedQuery;
 
 // Establish connection
 connection.connect(function (err) {
   if (err) console.log("There was an error:", err);
   else console.log("Connected!");
+  //promisifiedQuery = util.promisify(connection.query);
 });
+
 
 // let reservations = [];
 let reservations = [];
-let currentReservations =[];
+let currentReservations = [];
 let allReservations = [];
 
 // Get objects for tables
@@ -47,28 +52,34 @@ server.get("/", function (req, res) {
 });
 
 // Display tables and wait list
+// your connection.query can look different 
 server.get("/api/tables", async (req, res) => {
-  try {
-    const reservations = await connection.query("SELECT * FROM reservations");
+  //try {
+  connection.query("SELECT * FROM restaurant.reservations", (error, reservations) => {
+    if (error) {
+      console.log("Error:", error)
+      return res.json(error)
+    }
     let tables = getTables(reservations);
     let waitList = getWaitList(reservations);
     res.json({ tables, waitList });
-  } catch (error) {
-    console.log("There was an error while reading from database.");
-  }
+  });
 });
 
 // Get reservation data
+// Not tested (probably won't work)
 server.post("/reserve", async (req, res) => {
   try {
     const { id, name, email, phone } = req.body;
-    await connection.query(`INSERT INTO reservations(id, name, email, phone) VALUES (${id}, ${name}, ${email}, ${phone}`);
+    console.log(req.body);
+    await connection.query(`INSERT INTO restaurant.reservations(id, name, email, phone) VALUES (${id}, ${name}, ${email}, ${phone}`);
     res.json({ success })
   } catch (error) {
-    console.log("There was an error while saving to database");
+    console.log("There was an error while saving to database:", error);
   }
 })
-  // previous ver
+
+// previous ver
 // server.post("/reserve", function(req, res) {
 //   let newReservation = req.body;
 //   reservations.push(newReservation);
@@ -80,6 +91,8 @@ server.post("/reserve", async (req, res) => {
 server.listen(port, () => {
   console.log("Server is listening in port ", port)
 });
+
+
 
 // const mysql = require("mysql")
 
@@ -99,7 +112,7 @@ server.listen(port, () => {
 //      // console.log("connected",connection)
 //   }
 
-  
+
 //   /* connection.query(`Insert into reservations(firstName,surname) values(${reservations.tables.name} , ${reservations.tables[0].PhoneNumber}, ${reservations.tables[0].EmailAdress})`,function(err,result){
 //       if(err)console.log("error in query ", err)
 //       else console.log("result", result)
