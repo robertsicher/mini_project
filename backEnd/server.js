@@ -58,7 +58,7 @@ server.get("/api/tables", async (req, res) => {
   connection.query("SELECT * FROM restaurant.reservations", (error, reservations) => {
     if (error) {
       console.log("Error:", error)
-      return res.json(error)
+      return res.status(500).json(error)
     }
     let tables = getTables(reservations);
     let waitList = getWaitList(reservations);
@@ -67,16 +67,16 @@ server.get("/api/tables", async (req, res) => {
 });
 
 // Get reservation data
-// Not tested (probably won't work)
 server.post("/reserve", async (req, res) => {
-  try {
-    const { id, name, email, phone } = req.body;
-    console.log(req.body);
-    await connection.query(`INSERT INTO restaurant.reservations(id, name, email, phone) VALUES (${id}, ${name}, ${email}, ${phone}`);
-    res.json({ success })
-  } catch (error) {
-    console.log("There was an error while saving to database:", error);
-  }
+  const { name, email, phone } = req.body;
+  console.log(req.body);
+  connection.query(`INSERT INTO restaurant.reservations(name, email, phone) VALUES ("${name}", "${email}", "${phone}")`, (error, success) => {
+    if (error) {
+      console.log("There was an error while saving to database:", error);
+      return res.status(500).json(error)
+    }
+    res.json({ success });
+  });
 })
 
 // previous ver
