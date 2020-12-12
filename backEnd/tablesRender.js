@@ -1,5 +1,15 @@
-const connection = require("./connection")
-// const handlebars = require("handlebars")
+const connection = require("./connection");
+const handlebars = require("express-handlebars");
+
+const setEngine = (server) => {
+  server.engine("handlebars", handlebars({ defaultLayout: "main" }));
+  server.set("view engine", "handlebars");
+  console.log("Handlebars set.");
+}
+
+const inc = (value) => {
+  return value + 1;
+}
 
 // Get objects for tables
 const getTables = (reservations) => {
@@ -11,7 +21,7 @@ const getWaitList = (reservations) => {
   return reservations.slice(5);
 };
 
-
+// Get response and render "tables" page with { data } included
 const renderHTML = (res) => {
   connection.query("SELECT * FROM restaurant.reservations", (error, reservations) => {
     if (error) {
@@ -20,8 +30,15 @@ const renderHTML = (res) => {
     }
     let tables = getTables(reservations);
     let waitList = getWaitList(reservations);
-    res.json({ tables, waitList });
+    res.render("tables", {
+      tables, waitList, helpers: {
+        inc
+      }
+    });
   });
 }
 
-module.exports = renderHTML;
+module.exports = {
+  renderHTML,
+  setEngine
+}
