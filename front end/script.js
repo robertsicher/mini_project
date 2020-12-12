@@ -1,29 +1,26 @@
-// $("#reserve-btn").click(function (event) {
-//   event.preventDefault();
-//   $.post("http://localhost:3000/reserve",
-//     {
-//       "name": $("#reserveName").val(),
-//       "phone": $("#reserveNumber").val(),
-//       "email": $("#reserveEmail").val(),
-//     }).fail()
-// });
-
+const inputName = $("#reserveName");
+const inputPhone = $("#reserveNumber");
+const inputEmail = $("#reserveEmail");
 
 $("#reserve-btn").click(function (event) {
   event.preventDefault();
-  $.ajax({
-    method: "post",
-    url: "/reserve",
-    data: {
-      "name": $("#reserveName").val(),
-      "phone": $("#reserveNumber").val(),
-      "email": $("#reserveEmail").val(),
-    },
-  }).then(() => {
-    document.location.href = "http://localhost:3000/tables.html";
-  }).catch(() => {
-    alert("There was an error while sending data.")
-  })
+  if ((inputName.val().replace(/ /g, "") < 1) || (inputPhone.val().replace(/ /g, "") < 1 || inputEmail.val().replace(/ /g, "") < 1)) {
+    alert("Cannot submit empty fields. Please provide proper details.")
+  } else {
+    $.ajax({
+      method: "post",
+      url: "/reserve",
+      data: {
+        "name": inputName.val(),
+        "phone": inputPhone.val(),
+        "email": inputEmail.val(),
+      },
+    }).then(() => {
+      document.location.href = "http://localhost:3000/tables.html";
+    }).catch(() => {
+      alert("There was an error while sending data.")
+    })
+  }
 });
 
 const restaurantTables = $("#tableSection");
