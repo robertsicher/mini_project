@@ -1,0 +1,81 @@
+<div class="container">
+
+	<div class="jumbotron">
+		<h1 class="text-center"><span class="fas fa-fire"></span> Hot Restaurant</h1>
+		<hr>
+		<h2 class="text-center">Current Reservations and Waiting List</h2>
+		<br>
+
+		<div class="text-center">
+			<a href="reserve.html"><button type="button" class="btn btn-lg btn-danger"><span
+						class="glyphicon glyphicon-credit-card"></span> Make Reservation</button></a>
+			<a href="/"><button type="button" class="btn btn-lg btn-default"><span
+						class="glyphicon glyphicon-home"></span></button></a>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-lg-12">
+
+			<!-- Current Tables in Use -->
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h4 class="panel-title">Current Reservations</h4>
+				</div>
+				<div class="panel-body">
+					<table id="tableSection" class="table table-striped">
+						<tr>
+							<th scope="col">Table number</th>
+							<th scope="col">Name</th>
+							<th scope="col">Phone number</th>
+							<th scope="col">Email</th>
+						</tr>
+						{{#each tables }}
+						<tr>
+							<th scope="row">{{inc @index}}</th>
+							<td>{{name}}</td>
+							<td>{{phone}}</td>
+							<td>{{email}}</td>
+						</tr>
+						{{/each}}
+					</table>
+				</div>
+			</div>
+
+			<!-- Waiting List Panel -->
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h4 class="panel-title">Waiting List</h4>
+				</div>
+				<div class="panel-body">
+					<table id="waitlistSection" class="table table-striped">
+						<tr>
+							<th scope="col">Number in queue</th>
+							<th scope="col">Name</th>
+							<th scope="col">Phone number</th>
+							<th scope="col">Email</th>
+						</tr>
+						{{#each waitList }}
+						<tr>
+							<th scope="row">{{inc @index}}</th>
+							<td>{{name}}</td>
+							<td>{{phone}}</td>
+							<td>{{email}}</td>
+						</tr>
+						{{/each}}
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<footer class="footer">
+		<div class="container">
+			<p>Control Panel</p>
+			<p><a href="#" id="clear">Clear Table</a> | <a href="/api/tables">API Table Link</a> | <a href="/api/waitlist">API
+					Wait List</a></p>
+		</div>
+	</footer>
+
+</div>

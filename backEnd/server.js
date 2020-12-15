@@ -12,14 +12,16 @@ server.use(express.urlencoded({ extended: true }));
 server.use(express.json());
 const connection = require("./connection")
 
+tablesRender.setEngine(server);
+
 // Display homepage
 server.get("/", function (req, res) {
   res.sendFile("../front end/index.html", { root: __dirname });
 });
 
 // Display tables and wait list
-server.get("/api/tables", async (req, res) => {
-  tablesRender(res);
+server.get("/tables", async (req, res) => {
+  tablesRender.renderHTML(res);
 });
 
 // Get reservation data
