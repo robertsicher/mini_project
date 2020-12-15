@@ -4,6 +4,7 @@ const server = express();
 const port = 3000;
 const mysql = require("mysql");
 const util = require("util");
+const { Sequelize, DataTypes } = require('sequelize');
 server.use(cors());
 server.use(express.static('../front end'));
 // Hanle URL
@@ -13,21 +14,58 @@ server.use(express.json());
 
 // MYSQL 
 const password = process.argv[2];
-const connection = mysql.createConnection({
+const connection = new Sequelize(
+  'miniProject',
+  'root',
+  password,
+  {
+    host: 'localhost',
+    dialect: 'mysql',
+  }
+);
+
+/* const connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
   user: "root",
   password,
   database: "miniProject",
-});
+}); */
+
+const Customer = connection.define('reservations', {
+  id         : { type: DataTypes.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true },
+  fullName   : { type: DataTypes.STRING(255) },
+  PhoneNumber: { type: DataTypes.STRING(20) },
+  EmailAddress: {type: DataTypes.STRING(255) }
+},  {
+  timestamps : false,
+} );
+Customer.sync( { /* force: true */ } );
+// this table is created for us if it doesn't already exist - see the .sync() method call below
+ 
+ 
 
 //let promisifiedQuery;
 
 // Establish connection
-connection.connect(function (err) {
+/* connection.connect(function (err) {
   if (err) console.log("There was an error:", err);
   else console.log("Connected!");
   //promisifiedQuery = util.promisify(connection.query);
+}); */
+
+connection.authenticate()
+.then(() => {
+  console.log('Connection has been established successfully.');
+})
+.then(() => {
+  return Customer.findAll()
+})
+.then((data) => {
+  console.log("matches", data);
+})
+.catch((error) => {
+    console.log("oh no error", error);
 });
 
 
@@ -35,6 +73,32 @@ connection.connect(function (err) {
 let reservations = [];
 let currentReservations = [];
 let allReservations = [];
+
+//Validate email
+function ValidateEmail(mail) 
+{
+ if (/^[^@]+@\w+(\.\w+)+\w$/.test(mail))
+  {
+    return (true)
+  }
+    console.log("You have entered an invalid email address!")
+    return (false)
+}
+
+//validade phone number
+function phonenumber(inputtxt)
+{
+  
+  if((/^\d{10}$/.test(inputtxt)))
+        {
+      return true;
+        }
+      else
+        {
+        console.log("message");
+        return false;
+        }
+}
 
 // Get objects for tables
 const getTables = (reservations) => {
@@ -55,15 +119,33 @@ server.get("/", function (req, res) {
 // your connection.query can look different 
 server.get("/api/tables", async (req, res) => {
   //try {
-  connection.query("SELECT * FROM reservations", (error, reservations) => {
+   // Customer.findAll({})
+
+   
+ /* connection.query("SELECT * FROM reservations", (error, reservations) => {
     if (error) {
       console.log("Error:", error)
       return res.json(error)
-    }
-    let tables = getTables(reservations);
-    let waitList = getWaitList(reservations);
+    } */
+connection.authenticate()
+.then(() => {
+  console.log('Connection has been established successfully.');
+})
+.then(() => {
+  return Customer.findAll()
+})
+.then((data) => {
+  let tables = getTables(data);
+    let waitList = getWaitList(data);
     res.json({ tables, waitList });
-  });
+})
+.catch((error) => {
+    console.log("oh no error", error);
+});
+
+
+    
+  //});
 });
 
 // Get reservation data
@@ -71,10 +153,27 @@ server.get("/api/tables", async (req, res) => {
 server.post("/reserve", async (req, res) => {
   try {
     const { id, name, email, phone } = req.body;
+    ValidateEmail(email)
+    phonenumber(phone)
     console.log(req.body);
-    await connection.query(`INSERT INTO reservations(fullName, PhoneNumber, EmailAdress) VALUES ('${name}', '${phone}', '${email}');`);
+    connection.authenticate()
+.then(() => {
+  console.log('Connection has been established successfully.');
+})
+.then(() => {
+  return Customer.findAll()
+})
+.then((data) => {
+  let tables = getTables(data);
+    let waitList = getWaitList(data);
+    res.json({ tables, waitList });
+})
+.catch((error) => {
+    console.log("oh no error", error);
+});
+    //query(`INSERT INTO reservations(fullName, PhoneNumber, EmailAddress) VALUES ('${name}', '${phone}', '${email}');`);
     res.json({ success })
-  } catch (error) {
+  }catch (error) {
     console.log("There was an error while saving to database:", error);
   }
 })
@@ -82,43 +181,73 @@ server.post("/reserve", async (req, res) => {
 //Registered user 
 //Getting a put
 server.put("/api/tables/:id", async (req,res) => {
-  connection.query("SELECT * FROM reservations", (error, reservations) => {
+  connection.authenticate()
+  .then(() => {
+    console.log('Connection has been established successfully.');
+  })
+  .then(() => {
+    return Customer.findAll()
+  })
+  .then((data) => {
+    let currentReservation = req.body
+    data = reservations.filter( (values) =>{ if(values.id == currentReservation.id){
+      data.name = currentReservation.name
+      data.phone = currentReservation.phone
+      data.email = currentReservation.email
+  }})
+})
+  .catch((error) => {
+      console.log("oh no error", error);
+  });
+   
+  /* connection.query("SELECT * FROM reservations", (error, reservations) => {
     if (error) {
       console.log("Error:", error)
       return res.json(error)
     }
-    let currentReservation = req.body
-    reservations = reservations.filter( (values) =>{ if(values.id == currentReservation.id){
-      reservations.name = currentReservation.name
-      reservations.phone = currentReservation.phone
-      reservations.email = currentReservation.email
-    }
-  })
+  
+    } */
+  //})
     try {
-      connection.query(`INSERT INTO reservations(fullName, PhoneNumber, EmailAdress) VALUES ('${ reservations.name}', '${ reservations.phone}', '${reservations.email}');`);
+      connection.query(`INSERT INTO reservations(fullName, PhoneNumber, EmailAddress) VALUES ('${ reservations.name}', '${ reservations.phone}', '${reservations.email}');`);
       res.json({ success })
     } catch (error) {
       console.log("There was an error while saving to database:", error);
     }
       res.json({ tables, waitList });
   });
-})
+
 
 //Registered user
 //Deleting a reservation
 server.delete("/api/tables/:id", async (req,res) => {
   try {
-    connection.query("SELECT * FROM reservations", (error, reservations) => {
-      reservations = reservations.filter( (values) => values.id != currentReservation.id)
-      connection.query(`INSERT INTO reservations(fullName, PhoneNumber, EmailAdress) VALUES ('${ reservations.name}', '${ reservations.phone}', '${reservations.email}');`);
-      res.json({ success })
-    })
+
+    connection.authenticate()
+.then(() => {
+  console.log('Connection has been established successfully.');
+})
+.then(() => {
+  return Customer.findAll()
+})
+.then((data) => {
+    data = data.filter((values) => values.id != currentReservation.id)
+    return data
+})
+.then((data) => {
+  Customer.create({
+    fullName: `${data.fullname}`,
+    PhoneNumber: `${data.PhoneNumber}`,
+    EmailAddress: `${email.EmailAddress}`
+  })
+})
+.catch((error) => {
+    console.log("oh no error", error);
+});
   } catch (error) {
     console.log("There was an error while saving to database:", error);
   }
-
 })
-
 
 // previous ver
 // server.post("/reserve", function(req, res) {
@@ -160,7 +289,6 @@ server.listen(port, () => {
 //       hello(result)
 //   }) */
 // })
-
 
 //  const insert = (reservations) => {
 //   console.log(reservations)
